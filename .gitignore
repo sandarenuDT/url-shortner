@@ -2,6 +2,7 @@
 
 .env
 **/appsettings.Development.json
+**/appsettings.json
 **/bin/
 **/obj/
 # Migration factory files (contain local DB credentials)
