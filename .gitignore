@@ -1,0 +1,8 @@
+# url-shortener/.gitignore
+
+.env
+**/appsettings.Development.json
+**/bin/
+**/obj/
+# Migration factory files (contain local DB credentials)
+**/Data/DesignTimeDbContextFactory.cs
