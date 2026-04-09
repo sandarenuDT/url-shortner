@@ -25,7 +25,8 @@ public class UrlsController : ControllerBase
 
     private string BuildShortUrl(string code) =>
         $"{_config["BaseUrl"]}/{code}";
-        
+
+    // POST api/urls → Create a short URL
     [HttpPost]
     public async Task<IActionResult> Create(CreateUrlDto dto)
     {
@@ -35,20 +36,23 @@ public class UrlsController : ControllerBase
         if (!Uri.TryCreate(dto.OriginalUrl, UriKind.Absolute, out _))
             return BadRequest(new { message = "Invalid URL format." });
 
-        var shortUrl = await _urlService.CreateAsync(dto.OriginalUrl, GetUserId(), dto.ExpiresAt);
+        var shortUrl = await _urlService.CreateAsync(
+            dto.OriginalUrl, GetUserId(), dto.ExpiresAt);
 
-        return CreatedAtAction(nameof(GetById), new { id = shortUrl.Id }, new UrlResponseDto
-        {
-            Id = shortUrl.Id,
-            OriginalUrl = shortUrl.OriginalUrl,
-            ShortCode = shortUrl.ShortCode,
-            ShortUrl = BuildShortUrl(shortUrl.ShortCode),
-            ClickCount = shortUrl.ClickCount,
-            CreatedAt = shortUrl.CreatedAt,
-            ExpiresAt = shortUrl.ExpiresAt
-        });
+        return CreatedAtAction(nameof(GetById), new { id = shortUrl.Id },
+            new UrlResponseDto
+            {
+                Id = shortUrl.Id,
+                OriginalUrl = shortUrl.OriginalUrl,
+                ShortCode = shortUrl.ShortCode,
+                ShortUrl = BuildShortUrl(shortUrl.ShortCode),
+                ClickCount = shortUrl.ClickCount,
+                CreatedAt = shortUrl.CreatedAt,
+                ExpiresAt = shortUrl.ExpiresAt
+            });
     }
 
+    // GET api/urls → Get all URLs for logged-in user
     [HttpGet]
     public async Task<IActionResult> GetAll()
     {
@@ -68,6 +72,7 @@ public class UrlsController : ControllerBase
         return Ok(result);
     }
 
+    // GET api/urls/{id} → Get single URL by id
     [HttpGet("{id}")]
     public async Task<IActionResult> GetById(int id)
     {
@@ -87,6 +92,7 @@ public class UrlsController : ControllerBase
         });
     }
 
+    // DELETE api/urls/{id} → Delete a URL
     [HttpDelete("{id}")]
     public async Task<IActionResult> Delete(int id)
     {
@@ -95,14 +101,15 @@ public class UrlsController : ControllerBase
         return NoContent();
     }
 
+    // GET /r/{code} → Redirect to original URL (no auth needed)
     [AllowAnonymous]
     [HttpGet("/r/{code}")]
-    public new async Task<IActionResult> Redirect(string code)
+    public async Task<IActionResult> RedirectToUrl(string code)
     {
         var originalUrl = await _urlService.ResolveAsync(code);
         if (originalUrl == null)
             return NotFound(new { message = "Short URL not found or expired." });
 
-        return await Redirect(originalUrl);
+        return new RedirectResult(originalUrl, permanent: false);
     }
 }
