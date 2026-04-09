@@ -84,6 +84,3 @@ Authorization: Bearer {token}
 - Secrets managed via `.env` file
 
 ---
-
-## 👨‍💻 Author
-Built by [Your Name] — [your-email@example.com]
