@@ -32,14 +32,15 @@ jobs:
       - name: Login to Amazon ECR
         id: login-ecr
         uses: aws-actions/amazon-ecr-login@v2
-
-      # 4. Build & Push AuthService
+# 4. Build & Push AuthService
       - name: Build and push AuthService
         uses: docker/build-push-action@v5
         with:
           context: ./services/AuthService
           push: ${{ github.ref == 'refs/heads/main' }}
           tags: ${{ env.ECR_REGISTRY }}/url-shortener/auth-service:${{ github.sha }},${{ env.ECR_REGISTRY }}/url-shortener/auth-service:latest
+          build-args: |
+            NUGET_PACKAGES=/root/.nuget/packages
 
       # 5. Build & Push UrlService
       - name: Build and push UrlService
@@ -48,6 +49,8 @@ jobs:
           context: ./services/UrlService
           push: ${{ github.ref == 'refs/heads/main' }}
           tags: ${{ env.ECR_REGISTRY }}/url-shortener/url-service:${{ github.sha }},${{ env.ECR_REGISTRY }}/url-shortener/url-service:latest
+          build-args: |
+            NUGET_PACKAGES=/root/.nuget/packages
 
       # 6. Build & Push AnalyticsService
       - name: Build and push AnalyticsService
@@ -56,7 +59,17 @@ jobs:
           context: ./services/AnalyticsService
           push: ${{ github.ref == 'refs/heads/main' }}
           tags: ${{ env.ECR_REGISTRY }}/url-shortener/analytics-service:${{ github.sha }},${{ env.ECR_REGISTRY }}/url-shortener/analytics-service:latest
+          build-args: |
+            NUGET_PACKAGES=/root/.nuget/packages
 
+        # Cache NuGet packages
+      - name: Cache NuGet packages
+        uses: actions/cache@v3
+        with:
+          path: ~/.nuget/packages
+          key: ${{ runner.os }}-nuget-${{ hashFiles('**/*.csproj') }}
+          restore-keys: |
+            ${{ runner.os }}-nuget-
       # 7. Summary
       - name: Print image tags
         run: |
