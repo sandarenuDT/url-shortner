@@ -20,6 +20,9 @@ builder.Services.AddDbContext<AppDbContext>(options =>
 builder.Services.AddSingleton<IConnectionMultiplexer>(
     ConnectionMultiplexer.Connect(builder.Configuration["Redis:ConnectionString"]!));
 
+// ── RabbitMQ Publisher ────────────────────────────────────────
+builder.Services.AddSingleton<EventPublisher>();
+
 // ── JWT Auth ──────────────────────────────────────────────────
 builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
     .AddJwtBearer(options =>

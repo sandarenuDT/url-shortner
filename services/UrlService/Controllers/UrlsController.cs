@@ -101,12 +101,27 @@ public class UrlsController : ControllerBase
         return NoContent();
     }
 
-    // GET /r/{code} → Redirect to original URL (no auth needed)
+    // // GET /r/{code} → Redirect to original URL (no auth needed)
+    // [AllowAnonymous]
+    // [HttpGet("/r/{code}")]
+    // public async Task<IActionResult> RedirectToUrl(string code)
+    // {
+    //     var originalUrl = await _urlService.ResolveAsync(code);
+    //     if (originalUrl == null)
+    //         return NotFound(new { message = "Short URL not found or expired." });
+
+    //     return new RedirectResult(originalUrl, permanent: false);
+    // }
     [AllowAnonymous]
     [HttpGet("/r/{code}")]
     public async Task<IActionResult> RedirectToUrl(string code)
     {
-        var originalUrl = await _urlService.ResolveAsync(code);
+        // Capture request info for analytics
+        var ipAddress = HttpContext.Connection.RemoteIpAddress?.ToString();
+        var userAgent = Request.Headers["User-Agent"].ToString();
+        var referer = Request.Headers["Referer"].ToString();
+
+        var originalUrl = await _urlService.ResolveAsync(code, ipAddress, userAgent, referer);
         if (originalUrl == null)
             return NotFound(new { message = "Short URL not found or expired." });
 
