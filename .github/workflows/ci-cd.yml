@@ -1,0 +1,65 @@
+name: CI/CD — Build & Push to AWS ECR
+
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
+
+env:
+  AWS_REGION: ${{ secrets.AWS_REGION }}
+  ECR_REGISTRY: 847946222506.dkr.ecr.us-east-1.amazonaws.com
+
+jobs:
+  build-and-push:
+    name: Build & Push Docker Images
+    runs-on: ubuntu-latest
+
+    steps:
+      # 1. Checkout code
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      # 2. Configure AWS credentials
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: ${{ env.AWS_REGION }}
+
+      # 3. Login to Amazon ECR
+      - name: Login to Amazon ECR
+        id: login-ecr
+        uses: aws-actions/amazon-ecr-login@v2
+
+      # 4. Build & Push AuthService
+      - name: Build and push AuthService
+        uses: docker/build-push-action@v5
+        with:
+          context: ./services/AuthService
+          push: ${{ github.ref == 'refs/heads/main' }}
+          tags: ${{ env.ECR_REGISTRY }}/url-shortener/auth-service:${{ github.sha }},${{ env.ECR_REGISTRY }}/url-shortener/auth-service:latest
+
+      # 5. Build & Push UrlService
+      - name: Build and push UrlService
+        uses: docker/build-push-action@v5
+        with:
+          context: ./services/UrlService
+          push: ${{ github.ref == 'refs/heads/main' }}
+          tags: ${{ env.ECR_REGISTRY }}/url-shortener/url-service:${{ github.sha }},${{ env.ECR_REGISTRY }}/url-shortener/url-service:latest
+
+      # 6. Build & Push AnalyticsService
+      - name: Build and push AnalyticsService
+        uses: docker/build-push-action@v5
+        with:
+          context: ./services/AnalyticsService
+          push: ${{ github.ref == 'refs/heads/main' }}
+          tags: ${{ env.ECR_REGISTRY }}/url-shortener/analytics-service:${{ github.sha }},${{ env.ECR_REGISTRY }}/url-shortener/analytics-service:latest
+
+      # 7. Summary
+      - name: Print image tags
+        run: |
+          echo "AuthService: ${{ env.ECR_REGISTRY }}/url-shortener/auth-service:${{ github.sha }}"
+          echo "UrlService: ${{ env.ECR_REGISTRY }}/url-shortener/url-service:${{ github.sha }}"
+          echo "AnalyticsService: ${{ env.ECR_REGISTRY }}/url-shortener/analytics-service:${{ github.sha }}"
