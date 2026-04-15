@@ -1,0 +1,50 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: analytics-service
+  namespace: url-shortener
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: analytics-service
+  template:
+    metadata:
+      labels:
+        app: analytics-service
+    spec:
+      containers:
+        - name: analytics-service
+          image: 847946222506.dkr.ecr.us-east-1.amazonaws.com/url-shortener/analytics-service:latest
+          ports:
+            - containerPort: 8080
+          env:
+            - name: ConnectionStrings__DefaultConnection
+              value: "Host=postgres;Database=analyticsdb;Username=postgres;Password=990715"
+            - name: RabbitMQ__Host
+              value: "rabbitmq"
+            - name: RabbitMQ__Username
+              valueFrom:
+                secretKeyRef:
+                  name: app-secrets
+                  key: RABBITMQ_USERNAME
+            - name: RabbitMQ__Password
+              valueFrom:
+                secretKeyRef:
+                  name: app-secrets
+                  key: RABBITMQ_PASSWORD
+            - name: JwtSettings__Secret
+              valueFrom:
+                secretKeyRef:
+                  name: app-secrets
+                  key: JWT_SECRET
+            - name: JwtSettings__Issuer
+              valueFrom:
+                secretKeyRef:
+                  name: app-secrets
+                  key: JWT_ISSUER
+            - name: JwtSettings__Audience
+              valueFrom:
+                secretKeyRef:
+                  name: app-secrets
+                  key: JWT_AUDIENCE

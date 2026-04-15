@@ -1,0 +1,52 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: url-service
+  namespace: url-shortener
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: url-service
+  template:
+    metadata:
+      labels:
+        app: url-service
+    spec:
+      containers:
+        - name: url-service
+          image: 847946222506.dkr.ecr.us-east-1.amazonaws.com/url-shortener/url-service:latest
+          ports:
+            - containerPort: 8080
+          env:
+            - name: ConnectionStrings__DefaultConnection
+              value: "Host=postgres;Database=urldb;Username=postgres;Password=990715"
+            - name: Redis__ConnectionString
+              value: "redis:6379"
+            - name: RabbitMQ__Host
+              value: "rabbitmq"
+            - name: RabbitMQ__Username
+              valueFrom:
+                secretKeyRef:
+                  name: app-secrets
+                  key: RABBITMQ_USERNAME
+            - name: RabbitMQ__Password
+              valueFrom:
+                secretKeyRef:
+                  name: app-secrets
+                  key: RABBITMQ_PASSWORD
+            - name: JwtSettings__Secret
+              valueFrom:
+                secretKeyRef:
+                  name: app-secrets
+                  key: JWT_SECRET
+            - name: JwtSettings__Issuer
+              valueFrom:
+                secretKeyRef:
+                  name: app-secrets
+                  key: JWT_ISSUER
+            - name: JwtSettings__Audience
+              valueFrom:
+                secretKeyRef:
+                  name: app-secrets
+                  key: JWT_AUDIENCE
