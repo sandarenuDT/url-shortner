@@ -19,7 +19,7 @@ A production-ready URL shortener built with 3 microservices, deployed on AWS EKS
 - **AWS ECR** — Container registry
 - **AWS EKS** — Kubernetes cluster
 - **AWS ALB** — Load balancer
-- **Prometheus + Grafana** — Monitoring
+<!-- - **Prometheus + Grafana** — Monitoring -->
 
 ---
 
@@ -158,7 +158,7 @@ Authorization: Bearer {token}
 
 ---
 
-## 📊 Monitoring
+<!--## 📊 Monitoring
 
 Access Grafana dashboard:
 ```bash
@@ -166,7 +166,7 @@ kubectl port-forward svc/monitoring-grafana 3000:80 -n monitoring
 ```
 Open: http://localhost:3000 (admin/admin123)
 
----
+--- -->
 
 ## ✅ Key Features
 
@@ -178,4 +178,4 @@ Open: http://localhost:3000 (admin/admin123)
 - ✅ Full CI/CD with GitHub Actions
 - ✅ Kubernetes on AWS EKS
 - ✅ Auto-scaling (1-3 nodes)
-- ✅ Prometheus + Grafana monitoring
+<!-- - ✅ Prometheus + Grafana monitoring -->
